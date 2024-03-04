@@ -1,0 +1,308 @@
+ 
+def RemoteClient(request):
+try:
+      
+      selected_gw_id = request.GET.get('selected_gw_id', None)
+      selected_node_id = request.GET.get('selected_node_id', None)
+  
+
+      hostname = '2.56.154.117'
+      port = 22
+      username = 'root'
+      password = 'gesk2017'
+
+      transport  = paramiko.Transport((hostname, port))
+      transport .connect(username=username, password=password)
+
+      ssh = paramiko.SSHClient()
+      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+     
+      # if pub_{gw_id} in filename:
+          
+      # asd = f"/root/amazon_dh_logger/pub_{gw_id}_{node_id}.txt"
+      context = dict()
+      nodes_with_gw_ids= dict()
+      gw_ids = set()
+      # local_path = 'logs/pub_083a8d01d0a0_4175154.txt'
+      ssh.connect(hostname=hostname, username=username, password=password, port=port, )
+      sftp_client = ssh.open_sftp()
+      filename_list = sftp_client.listdir("/root/amazon_dh_logger/")
+      # print(sftp_client.listdir("/root/amazon_dh_logger/"))
+      for filename in filename_list:
+          if 'pub_' in filename:
+              # print(filename)
+              gw_id = filename.split('_')[1]
+              gw_ids.add(gw_id)
+
+              
+
+      for gw_id in gw_ids:
+          for file in filename_list:
+              if f"pub_{gw_id}" in file:
+                  if "conf" not in file:
+                      node_id = file.split('_')[2][:7]
+                      print(gw_id + "_"+node_id)
+                      if gw_id not in nodes_with_gw_ids.keys():
+                          nodes_with_gw_ids[gw_id] = set()
+                      nodes_with_gw_ids[gw_id].add(node_id)
+      
+      # print(nodes_with_gw_ids)
+      transport.close()
+      # print(gw_ids)
+      if (selected_gw_id):
+          context['selected_gw_id'] = selected_gw_id
+          context['node_ids'] = nodes_with_gw_ids[selected_gw_id]
+          if (selected_node_id):
+              context['selected_node_id'] = selected_node_id
+              remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+              filea = sftp_client.file(remote_path, "r")
+              found_message = filea.readlines()[-1]
+              parsed_found_message = json.loads(found_message.split("|")[1])
+              print(found_message)
+              context['found_message'] = found_message
+              context['found_message_id'] = parsed_found_message
+      context['gw_ids'] = gw_ids
+      return render(request, 'remote.html', context=context)
+
+except Exception as e:
+    print(f"download error:{str(e)}")
+  #   return HttpResponse("error: file upload")
+    return render(request, 'remote.html') 
+
+
+
+
+      from django.shortcuts import render,
+
+
+
+      
+import paramiko 
+from paramiko import SSHClient
+from django.http import HttpResponse
+
+
+
+# Create your views here.
+
+BENİMZ YAZDIĞIM
+
+def RemoteClient(request):
+  try:
+
+        hostname = '2.56.154.117'
+        port = 22
+        username = 'root'
+        password = 'gesk2017'
+
+        transport  = paramiko.Transport((hostname, port))
+        transport .connect(username=username, password=password)
+
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+       
+        # if pub_{gw_id} in filename:
+            
+        # asd = f"/root/amazon_dh_logger/pub_{gw_id}_{node_id}.txt"
+        nodes_with_gw_ids= dict()
+        gw_ids = set()
+        gw_node_mapping = dict()
+        file_content = filea.read()
+        # local_path = 'logs/pub_083a8d01d0a0_4175154.txt'
+        ssh.connect(hostname=hostname, username=username, password=password, port=port, )
+        sftp_client = ssh.open_sftp()
+        filename_list = sftp_client.listdir("/root/amazon_dh_logger/")
+        # print(sftp_client.listdir("/root/amazon_dh_logger/"))
+        for filename in filename_list:
+            if 'pub_' in filename:
+                # print(filename)
+                gw_id = filename.split('_')[1]
+                gw_ids.add(gw_id)
+        else:
+         print(f"{selected_gw_id} ile eşleşen bir gw_id bulunamadı.")
+
+        for line in file_content.split('\n'):
+            if f"pub_{selected_gw_id}" in line and "conf" not in line:
+                
+                node_id = line.split('_')[2][:7]
+                print(f"gw_id: {selected_gw_id}")
+                print(f"gw_id node_id: {node_id}")
+
+        for gw_id in gw_ids:
+            for file in filename_list:
+                if f"pub_{gw_id}" in file:
+                    if "conf" not in file:
+                        node_id = file.split('_')[2][:7]
+                        print(gw_id + "_"+node_id)
+                        if gw_id not in nodes_with_gw_ids.keys():
+                            nodes_with_gw_ids[gw_id] = [node_id]
+                        else:
+                            nodes_with_gw_ids[gw_id].append(node_id)
+        selected_gw_id = "083a8d01d0a0"
+        if selected_gw_id in gw_node_mapping:
+            selected_node_ids = gw_node_mapping[selected_gw_id]
+            print(f"gw_id: {selected_gw_id}")
+            print(f"gw_id node_id: {selected_node_ids}")
+        else:
+            print(f"{selected_gw_id }")
+        selected_node_id = "3995187"
+        remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+        filea = sftp_client.file(remote_path, "r")
+        print(filea.readlines()[-1])
+        # print(nodes_with_gw_ids)
+        transport.close()
+        # print(gw_ids)
+        return render(request, 'remote.html')
+  
+  except Exception as e:
+      print(f"download error:{str(e)}")
+    #   return HttpResponse("error: file upload")
+      return render(request, 'remote.html') 
+
+
+
+# import paramiko
+# from django.http import HttpResponse
+# from django.shortcuts import render, HttpResponse
+
+# def RemoteClient(request):
+#     try:
+#         hostname = '2.56.154.117'
+#         port = 22
+#         username = 'root'
+#         password = 'gesk2017'
+
+#         transport = paramiko.Transport((hostname, port))
+#         transport.connect(username=username, password=password)
+
+#         sftp = paramiko.SFTPClient.from_transport(transport)
+
+       
+#         remote_path = '/root/amazon_dh_logger/pub_083a8d01d0a0_4175154.txt'
+
+      
+#         local_path = 'logs/pub_083a8d01d0a0_4175154.txt'
+
+     
+#         sftp.get(remote_path, local_path)
+
+       
+#         sftp.close()
+#         transport.close()
+
+#         print("File download successful")
+
+#         return HttpResponse("SUCCESSFUL")
+  
+#     except Exception as e:
+#         print(f"Error dosya yolu: {str(e)}")
+#         return HttpResponse("EROR:REMEMEMM")
+#         return render(request, 'remote.html')
+    
+
+
+
+
+
+
+http://127.0.0.1:8000/blog/remote/?selected_gw_id=083a8d01d0a0&selected_node_id=2451253
+
+
+
+
+
+local path
+
+def RemoteClient(request):
+    try:
+        
+        selected_gw_id = request.GET.get('selected_gw_id', None)
+        selected_node_id = request.GET.get('selected_node_id', None)
+    
+
+        hostname = '2.56.154.117'
+        port = 22
+        username = 'root'
+        password = 'gesk2017'
+
+        # transport  = paramiko.Transport((hostname, port))
+        # transport.connect(username=username, password=password)
+
+        # ssh = paramiko.SSHClient()
+        # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+        # ssh.connect(hostname=hostname, username=username, password=password, port=port, )
+        # print("bsğlandı")
+        
+        # if pub_{gw_id} in filename:
+            
+        # asd = f"/root/amazon_dh_logger/pub_{gw_id}_{node_id}.txt"
+        context = dict()
+        nodes_with_gw_ids= dict()
+        gw_ids = set()
+        messages = list()
+        # local_path = 'logs/pub_083a8d01d0a0_4175154.txt'
+
+        dir = 'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/'
+
+        filename_list = os.listdir(dir)
+        # sftp_client = ssh.open_sftp()
+        # filename_list = sftp_client.listdir("/root/amazon_dh_logger/")
+        # print(sftp_client.listdir("/root/amazon_dh_logger/"))
+        for filename in filename_list:
+            if 'pub_' in filename:
+                # print(filename)
+                gw_id = filename.split('_')[1]
+                gw_ids.add(gw_id)
+
+                
+
+        for gw_id in gw_ids:
+            for file in filename_list:
+                if f"pub_{gw_id}" in file:
+                    if "conf" not in file:
+                        node_id = file.split('_')[2][:7]
+                        if gw_id not in nodes_with_gw_ids.keys():
+                            nodes_with_gw_ids[gw_id] = set()
+                        nodes_with_gw_ids[gw_id].add(node_id)
+        
+        # print(nodes_with_gw_ids)
+        # transport.close()
+        # print(gw_ids)
+        if (selected_gw_id):
+            context['selected_gw_id'] = selected_gw_id
+            context['node_ids'] = nodes_with_gw_ids[selected_gw_id]
+            if (selected_node_id):
+                context['selected_node_id'] = selected_node_id
+                # remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+                local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+                with open(local_path, "r") as filea:
+                    # filea = sftp_client.file(remote_path, "r")
+                    all_message = filea.readlines()
+                    all_message.reverse()
+                    for line in all_message:
+                        line_for_json = line.split('|')[1]
+                        line_json = json.loads(line_for_json)
+                        line_json['timestamp'] = line.split('|')[0]
+
+                        
+                        
+                        
+                        messages.append(line_json)
+                # all_message.reverse()
+                # all_message =  '\n'.join(all_message)
+                # context['all_message'] = all_message
+
+               
+                # context['found_message_id'] = parsed_found_message
+        context['all_message'] = messages
+        context['gw_ids'] = gw_ids
+
+        print(len(messages))
+
+        # ssh.close()
+        return render(request, 'remote.html', context=context)
+
+    except Exception as e:
+        print(f"download error:{str(e)}")
+    #   return HttpResponse("error: file upload")
+        return render(request, 'remote.html') 

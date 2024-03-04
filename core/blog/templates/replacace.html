@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap-grid.min.css"
+    integrity="sha512-i1b/nzkVo97VN5WbEtaPebBG8REvjWeqNclJ6AItj7msdVcaveKrlIIByDpvjk5nwHjXkIqGZscVxOrTb9tsMA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Remote Client</title>
+    <style>
+      
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 3px;
+            padding-right: 20px; 
+            background-color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <label for="gw_id">GW ID:</label>
+    <select id="gw_id" onchange="updateSelectedGW()">
+        {% for gw_id in gw_ids %}
+            <option value="{{ gw_id }}" {% if selected_gw_id == gw_id %} selected {% endif %}>{{ gw_id }}</option>
+        {% endfor %}
+    </select>
+    {% if selected_gw_id %}
+    <label for="node_id">Node ID:</label>
+    <select id="node_id" onchange="updateSelectedNode()">
+        {% for node_id in node_ids %}
+            <option value="{{ node_id }}" {% if selected_node_id == node_id %} selected {% endif %}>{{ node_id }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+
+    <h1> GW ID: {{ selected_gw_id }}</h1>
+    <h2> Node ID: {{ selected_node_id }}</h2>
+    <h2> Message: {{ all_message}}</h2>
+    
+    
+    {% comment %} <h2> Message Data: {{ found_message_id }}</h2> {% endcomment %}
+
+    
+    <pre>{{ json_data|safe }}</pre>
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    </script>
+    <script>
+        function updateSelectedGW() {
+            var selectedGW = document.getElementById("gw_id").value;
+            window.location.href = "?selected_gw_id=" + selectedGW;
+        }
+        function updateSelectedNode() {
+            var selectedNode = document.getElementById("node_id").value;
+            var selectedGW = document.getElementById("gw_id").value;
+            window.location.href = "?selected_gw_id=" + selectedGW + "&selected_node_id=" + selectedNode;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap-grid.min.css"
+
+    integrity="sha512-i1b/nzkVo97VN5WbEtaPebBG8REvjWeqNclJ6AItj7msdVcaveKrlIIByDpvjk5nwHjXkIqGZscVxOrTb9tsMA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Remote Client</title>
+    <style>
+                body {
+                    position: relative;
+                    min-height: 100vh;
+                    margin: 8px;
+                    padding-right: 20px; 
+                }
+
+                .border-collapse {
+                    border-collapse: collapse;
+                }
+
+                table.outer-table {
+                    border: 1px solid black;
+                    width: 90%;
+                    background-color: white;
+                }
+
+                
+
+                th, td {
+                    border: 1px solid black;
+                    padding: 8px;
+                    text-align: left;
+                
+                }
+                tr:hover td{
+                    background-color:rgb(139, 179, 193);
+                }
+                   
+                th {
+                    color: white;
+                    background-color:rgb(77, 153, 179);
+                    
+                }
+               label{
+                 color:black;
+                 font-size:15px;
+                 font-weight:bold;
+               }
+               h3{
+                font-size:15px;
+               }
+               th i {
+                margin-left: 10px; /* İkondan metne 5 piksellik bir boşluk ekler */
+            }
+
+            .tool{
+              owerflow: hidden;
+              background-color: #e9e9e9;   
+            }
+            .tool{
+                float: left;
+                display: block;
+                width: 88%;
+                height:100px;
+                text-align:center;
+                padding:14px 16px;
+                text-decoration:none;
+                font-size: 17px;
+                margin: 5px;
+
+            }
+           
+    </style>
+    
+    <script>
+        function updateSelectedGW() {
+            var selectedGW = document.getElementById("gw_id").value;
+            window.location.href = "?selected_gw_id=" + selectedGW;
+        }
+        function updateSelectedNode() {
+            var selectedNode = document.getElementById("node_id").value;
+            var selectedGW = document.getElementById("gw_id").value;
+            window.location.href = "?selected_gw_id=" + selectedGW + "&selected_node_id=" + selectedNode;
+        }
+        function filter() {
+            let selectedFilter;
+            var radios = document.getElementsByName('table-column-fields');
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].checked) {
+                    var radioElementId = radios[i].id.split('-')
+                    selectedFilter = radioElementId[radioElementId.length - 1];
+                    console.log('Selected radio button value:', selectedFilter);
+                    break;
+                }
+            }
+
+            if (!selectedFilter) return;
+
+            var minValue = document.getElementById("min-value").value || -99;
+            var maxValue = document.getElementById("max-value").value || 99;
+
+            var selectedGW = document.getElementById("gw_id").value;
+            var selectedNode = document.getElementById("node_id").value;
+            
+            window.location.href = "?selected_gw_id=" + selectedGW + "&selected_node_id=" + selectedNode + "&filter=" + selectedFilter + "&min_value=" + minValue + "&max_value=" + maxValue;
+        }
+        function sortTable(columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch, switchcount = 0;
+            table = document.getElementById("filterTable");
+            switching = true;
+           
+            var direction = "ascending";
+            
+            while (switching) {
+                
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+               
+                for (i = 1; i < (rows.length - 1); i++) {
+                   
+                    shouldSwitch = false;
+                   
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+                  
+                    if (direction == "ascending") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                           
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (direction == "descending") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                   
+                    switchcount++;
+                } else {
+                    
+                    if (switchcount == 0 && direction == "ascending") {
+                        direction = "descending";
+                        switching = true;
+                    }
+                }
+            }
+        }
+        
+        
+    </script>
+</head>
+<body>
+     
+            <div style="display:block; display:flex margin:3px;">        
+                <label for="gw_id">GW ID:</label>
+                <select id="gw_id" onchange="updateSelectedGW()">
+                    {% for gw_id in gw_ids %}
+                        <option value="{{ gw_id }}" {% if selected_gw_id == gw_id %} selected {% endif %} onclick="printSelectedGW()">{{ gw_id }}</option>
+                    {% endfor %}
+                </select>
+           
+            {% if selected_gw_id %}
+      
+                
+                <label for="node_id">Node ID:</label>
+                <select id="node_id" onchange="updateSelectedNode()">
+                    {% for node_id in node_ids %}
+                        <option value="{{ node_id }}" {% if selected_node_id == node_id %} selected {% endif %}>{{ node_id }}</option>
+                    {% endfor %}
+                </select>
+
+            
+            </div>
+            {% endif %}
+
+
+                <input type="hidden" name="selected_gw_id" value="{{ selected_gw_id }}">  
+                 <h3>Seçilen GW ID: {{ selected_gw_id }}</h3>    
+                <input type="hidden" name="selected_node_id" value="{{ selected_node_id }}">
+                <h3>Seçilen  Node ID: {{ selected_node_id }}</h3>
+                
+                {% comment %} <div style='background:white; width:100%; height:50px; display:flex;align-items:center;justify-content:flex-start;flex-directions:row;'> {% endcomment %}
+                   
+                {% if selected_gw_id %}
+                  <div class ="tool">
+                 
+                    <fieldset id="table-column-fields" style='width:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start; border:none;'>
+                      
+                        <div style="display: flex;">
+                            <input type="radio" id="search-column-temp"  name="table-column-fields"><br>
+                            <label for="search-column-temp">TEMP</label><br> 
+                            <input type="radio" id="search-column-hum" name="table-column-fields">
+                            <label for="search-column-hum">HUM</label><br>
+                            <input type="radio" id="search-column-rxRssi" name="table-column-fields">
+                            <label for="search-column-rxrssi">RXRSSI</label><br>
+                            <input type="radio" id="search-column-txRssi" name="table-column-fields">
+                            <label for="search-column-txrssi">TXRSSI</label><br>
+                            <input type="radio" id="search-column-battery" name="table-column-fields">
+                            <label for="search-column-battery">BATTERY</label><br>
+                        </div>
+                        <div style="display: flex;">
+                            <input type="number" id="min-value" name="min-value" placeholder="Minimum değer girin" style="margin:2px; height:20px;"> 
+                            <input type="number" id="max-value" name="max-value" placeholder="Maksimum değer girin" style="margin:2px; height:20px;"> 
+                        </div>
+                        
+                        <button type="submit" onclick="filter()" style="background-color:rgb(77, 153, 179); color:white;">Filtrele</button><br>
+                        <input type="text" id="search-input" placeholder="Tabloda ara..." onkeyup="searchTable()" > 
+                    </fieldset>
+                  </div>
+                  {% endif %}
+                        {% comment %} <button onclick="filterTable({{all_message}})">Filter</button> {% endcomment %}
+                   
+                  
+           
+                {% comment %} <input type="text" id="search-input" placeholder="Tabloda ara..." onkeyup="searchTable()" style="margin-top:40px; height:25px; "> {% endcomment %}
+                    <table class="table" id="filterTable" style="background-color: white; width:90%;">
+                      
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)" id="th-date" >TARİH-SAAT <i id="th-date" class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(1)" id="th-id">ID <i id="th-id"  class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(2)" id="th-temp">TEMP <i id="th-temp" class="fa-solid fa-sort"></i></th>   
+                                <th onclick="sortTable(3)" id="th-hum">HUM <i id="th-hum" class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(4)" id="th-rxRssi">RXRSSI <i id="th-rxRssi" class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(5)" id="th-txRssi">TXRSSI <i id="th-txRssi" class="fa-solid fa-sort"></i></th>
+                                <th onclick="sortTable(6)" id="th-battery">BATTERY <i id="th-battery" class="fa-solid fa-sort"></i></th>
+                                </tr>
+                        </thead>
+                    
+
+                                
+                            {% for message in all_message %}
+                                <tr>
+                                    <td>{{ message.timestamp }}</td>
+                                    <td>{{ message.id }}</td>
+                                    <td>{{ message.temp }}</td>
+                                    <td>{{ message.hum }}</td>
+                                    <td>{{ message.rxRssi }}</td>
+                                    <td>{{ message.txRssi }}</td>
+                                    <td>{{ message.battery }}</td>
+                                    
+                                </tr>
+                            {%endfor%}
+                                
+                            
+                    </table>
+                    
+
+     
+    
+     </table>
+         
+ 
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+        function searchTable() {
+            var input, filter, table, tr, td, i, j, txtValue;
+            input = document.getElementById("search-input");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("filterTable"); 
+            tr = table.getElementsByTagName("tr");
+            
+            for (i = 0; i < tr.length; i++) {
+               
+                for (j = 0; j < tr[i].getElementsByTagName("td").length; j++) {
+                    td = tr[i].getElementsByTagName("td")[j];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                            break; 
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+{% comment %}    
+<script>
+    function filterNodes() {
+        var filterValue = document.getElementById("filter-value").value;
+        var table = document.getElementById("filterTable");
+        var rows = table.getElementsByTagName("tr");
+    
+        for (var i = 1; i <script rows.length; i++) {
+            var tempCell = rows[i].getElementsByTagName("td")[1]; 
+            var humCell = rows[i].getElementsByTagName("td")[2]; 
+            var rxRssiCell = rows[i].getElementsByTagName("td")[2]; 
+
+    
+            var tempValue = parseFloat(tempCell.innerText);
+            var humValue = parseFloat(humCell.innerText);
+    
+          
+            if (tempValue > filterValue || humValue > filterValue) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+    
+</script> {% endcomment %}
+
+{% comment %}   
+ <script>
+        function filterTable(all_message) {
+            console.log('all_message : ' , all_message)
+
+            var my_operator = 'smaller'
+            var my_input= 60
+            var my_key='TEMP'
+            var my_global_filtered_list = []
+
+        
+            const smallerButton = document.getElementById('search-filter-smaller');
+            if(smallerButton){
+                my_operator = 'smaller'
+            }
+            const biggerButton = document.getElementById('search-filter-bigger');
+            if(biggerButton){
+                my_operator = 'bigger'
+            }
+
+
+
+
+            const tempColumn = document.getElementById('search-column-temp');   
+            if(tempColumn){
+                my_key = 'TEMP'
+            }
+            const humColumn = document.getElementById('search-column-hum');
+            if(humColumn){
+                my_key = 'HUM'
+            }
+            const rxrssiColumn = document.getElementById('search-column-rxrssi');
+            if(rxrssiColumn){
+                my_key = 'RXRSSI'
+            }
+            const txrssiColumn = document.getElementById('search-column-txrssi');
+            if(txrssiColumn){
+                my_key = 'TXRSSI'
+            }
+            const batteryColumn = document.getElementById('search-column-battery');
+            if(batteryColumn){
+                my_key = 'BATTERY'
+            }
+        
+            console.log('Smaller Button Checked:', smallerButton.checked);
+            console.log('Bigger Button Checked:', biggerButton.checked);
+
+            console.log('TEMP Column Checked:', tempColumn.checked);
+            console.log('HUM Column Checked:', humColumn.checked);
+            console.log('RXRSSI Column Checked:', rxrssiColumn.checked);
+            console.log('TXRSSI Column Checked:', txrssiColumn.checked);
+            console.log('BATTERY Column Checked:', batteryColumn.checked);
+
+
+            window.location.href = "?selected_gw_id=" + my_key + "&selected_node_id=" + selectedNode;
+
+
+
+            if (humColumn.checked && biggerButton.checked) {
+                console.log('hum değeri 50\'den büyük olanlar: ', 'filtrele');
+            }
+      
+    }
+
+    function searchTable() {
+       
+    }
+</script>  {% endcomment %}
+  
+   
+
+</body>
+</html>
