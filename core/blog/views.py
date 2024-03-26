@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 import time
 import datetime
-import os
+# import os
 
 
 
@@ -31,12 +31,12 @@ def RemoteClient(request):
         username = 'root'
         password = 'gesk2017'
 
-        # transport  = paramiko.Transport((hostname, port))
-        # transport.connect(username=username, password=password)
+        transport  = paramiko.Transport((hostname, port))
+        transport.connect(username=username, password=password)
 
-        # ssh = paramiko.SSHClient()
-        # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-        # ssh.connect(hostname=hostname, username=username, password=password, port=port, )
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+        ssh.connect(hostname=hostname, username=username, password=password, port=port, )
         
     # if pub_{gw_id} in filename:
             
@@ -62,11 +62,11 @@ def RemoteClient(request):
         
         # local_path = 'logs/pub_083a8d01d0a0_4175154.txt'
 
-        dir = 'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/'
+        # dir = 'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/'
 
-        filename_list = os.listdir(dir)
-        # sftp_client = ssh.open_sftp()
-        # filename_list = sftp_client.listdir("/root/amazon_dh_logger/")
+        # filename_list = os.listdir(dir)
+        sftp_client = ssh.open_sftp()
+        filename_list = sftp_client.listdir("/root/amazon_dh_logger/")
         for filename in filename_list:
             if 'pub_' in filename:
                 gw_id = filename.split('_')[1]
@@ -102,9 +102,10 @@ def RemoteClient(request):
                             # print(f"dosya: {selected_node_id}")
                             
                         elif "conf" in file and f"pub_{gw_id}_conf" in file:
-                            local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/{file}'
+                            remote_path = f'/root/amazon_dh_logger/pub_{file}'
+                            # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/{file}'
 
-                            with open(local_path, 'r') as filea:
+                            with open(remote_path, 'r') as filea:
 
                                 conf_node_ids = filea.readlines()
                                 conf_node_ids.reverse()
@@ -135,15 +136,16 @@ def RemoteClient(request):
                          
 
                     elif f"gateway_" in file:
-                                local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
-                                print(f"Reading file: {local_path}")
+                                # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
+                                remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}.json'
+                                print(f"Reading file: {remote_path}")
                               
                                 try:
-                                    with open(local_path, 'r') as filea:
+                                    with open(remote_path, 'r') as filea:
                                         jsonData = json.loads(filea.read())
                                         gateway_messages.append(jsonData)  
                                 except Exception as e:
-                                    print(f"Error reading file {local_path}: {e}")
+                                    print(f"Error reading file {remote_path}: {e}")
 
                                     print(f"messages: {gateway_messages}")
 
@@ -164,11 +166,11 @@ def RemoteClient(request):
                     for node_id in nodes_with_gw_ids[selected_gw_id]:
                         if node_id != "all":
                             
-                            # remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{node_id}.txt'
-                            local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/pub_{selected_gw_id}_{conf_node_ids}.txt'
+                            remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{node_id}.txt'
+                            # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/pub_{selected_gw_id}_{conf_node_ids}.txt'
                             
-                            with open(local_path, "r") as filea:
-                                # filea = sftp_client.file(remote_path, "r")
+                            with open(remote_path, "r") as filea:
+                                filea = sftp_client.file(remote_path, "r")
                                 all_message = filea.readlines()
                                 all_message.reverse()
                                 for line in all_message:
@@ -186,10 +188,10 @@ def RemoteClient(request):
                             continue 
                 else:
                     context['selected_node_id'] = selected_node_id
-                    # remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
-                    local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
-                    with open(local_path, "r") as filea:
-                        # filea = sftp_client.file(remote_path, "r")
+                    remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+                    # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/pub_{selected_gw_id}_{selected_node_id}.txt'
+                    with open(remote_path, "r") as filea:
+                        filea = sftp_client.file(remote_path, "r")
                         all_message = filea.readlines()
                         all_message.reverse()
                         for line in all_message:
@@ -204,10 +206,11 @@ def RemoteClient(request):
                                     messages.append(line_json)
 
             else:
-                    # remote_path = f'/root/amazon_dh_logger/gateway_{selected_gw_id}.json'
-                    local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
+                    remote_path = f'/root/amazon_dh_logger/gateway_{selected_gw_id}.json'
+                    # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
                     try:
-                        with open(local_path, "r") as filea:
+                        with open(remote_path, "r") as filea:
+
                             all_message = filea.read()
                             nodes_data = json.loads(all_message)
                             print(nodes_data)
@@ -226,7 +229,7 @@ def RemoteClient(request):
                                 # else:
                                 messages.append(node_data)
                     except Exception as e:
-                            print(f"Error reading file {local_path}: {e}")
+                            print(f"Error reading file {remote_path}: {e}")
 
         if selected_node_id == "all":
             sorted_elements = sorted(messages, key=parse_timestamp)
@@ -243,7 +246,7 @@ def RemoteClient(request):
         context['selected_gateway_id'] = selected_gateway_id
         context[ 'gateway_messages'] = gateway_messages
 
-        # ssh.close()
+        ssh.close()
         return render(request, 'remote.html', context=context)
 
  
