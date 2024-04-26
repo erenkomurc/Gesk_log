@@ -223,7 +223,7 @@
                     <div style="margin-left: 10px;">
                         <label for="node_id">Node ID:</label>
                         <select id="node_id" style="width: 150px; height: 25px; border-radius: 4px;" onchange="updateSelectedNode()">
-                            <option disabled style="color: red;">Toplam Node ID Sayısı: {{ node_ids|length }}</option>
+                            <option disabled style="color: red;">Toplam Node ID Sayısı: {{ node_ids|length|add:'-2' }}</option>
                             {% for node_id in node_ids %}
                                 <option value="{{ node_id }}" {% if selected_node_id == node_id %} selected {% endif %}>{{ node_id }}</option>
                             {% endfor %}
@@ -314,7 +314,7 @@
                         
                         
                             <div>
-                                <input type="radio" id="reset-values" name="reset-values" value="reset" onclick="resetValues()">
+                                <input type="checkbox" id="reset-values" name="reset-values" value="reset" onclick="resetValues()">
                                 <label for="reset-values" >Değerleri Sıfırla</label><br>
                             </div>
                         
@@ -387,7 +387,7 @@
           
             idCells.forEach(function(cell) {
                
-                totalId += parseInt(cell.textContent.trim());
+                totalId += 1;
             });
 
            
@@ -490,7 +490,7 @@
         }
 
         matchDarkMode.addListener(applyThemeChange);
-        applyThemeChange(matchDarkMode);
+        {% comment %} applyThemeChange(matchDarkMode); {% endcomment %}
 
     </script>
 

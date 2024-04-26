@@ -102,7 +102,7 @@ def RemoteClient(request):
                             # print(f"dosya: {selected_node_id}")
                             
                         elif "conf" in file and f"pub_{gw_id}_conf" in file:
-                            remote_path = f'/root/amazon_dh_logger/pub_{file}'
+                            remote_path = f'/root/amazon_dh_logger/{file}'
                             # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/{file}'
 
                             with open(remote_path, 'r') as filea:
@@ -135,19 +135,23 @@ def RemoteClient(request):
                             print(f"dosya:{selected_node_id}")
                          
 
-                    elif f"gateway_" in file:
-                                # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
-                                remote_path = f'/root/amazon_dh_logger/pub_{selected_gw_id}.json'
-                                print(f"Reading file: {remote_path}")
-                              
-                                try:
-                                    with open(remote_path, 'r') as filea:
-                                        jsonData = json.loads(filea.read())
-                                        gateway_messages.append(jsonData)  
-                                except Exception as e:
-                                    print(f"Error reading file {remote_path}: {e}")
+                    # elif f"gateway_{selected_gw_id}" in file:
+                    #             # local_path = f'C:/Users/gesku/OneDrive/Desktop/amazon_dh_logger/gateway_{selected_gw_id}.json'
+                    #             remote_path = f'/root/amazon_dh_logger/gateway_{selected_gw_id}.json'
+                    #             print(f"Reading file: {remote_path}")
+                    #             try:
+                    #                 with open(remote_path, 'r') as filea:
+                    #                     jsonData = json.loads(filea.read())
+                    #                     print(jsonData.keys())
+                                
+                    #                     if "conf" in jsonData.keys():
+                    #                         del jsonData['conf']
+                    #                     gateway_messages.append(jsonData)
+                                        
+                    #             except Exception as e:
+                    #                 print(f"Error reading file {remote_path}: {e}")
 
-                                    print(f"messages: {gateway_messages}")
+                    #                 print(f"messages: {gateway_messages}")
 
             
 
@@ -216,6 +220,8 @@ def RemoteClient(request):
                             print(nodes_data)
                             for node_data in nodes_data.values():
                                 print("node data: ", node_data)
+                                if 'mac' in node_data.keys():
+                                    continue
                                 # if node_data.get("timestamp"):
                                 #     messages.append({
                                 #         "timestamp": "",
